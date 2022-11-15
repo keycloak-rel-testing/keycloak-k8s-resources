@@ -19,6 +19,14 @@ spec:
         properties:
           spec:
             properties:
+              hostname:
+                description: |-
+                  Hostname for the Keycloak server.
+                  The special value `INSECURE-DISABLE` disables the hostname strict resolution.
+                type: string
+              instances:
+                description: Number of Keycloak instances in HA mode. Default is 1.
+                type: integer
               serverConfiguration:
                 description: |-
                   Configuration of the Keycloak server.
@@ -40,14 +48,33 @@ spec:
                       type: string
                   type: object
                 type: array
-              hostname:
-                description: |-
-                  Hostname for the Keycloak server.
-                  The special value `INSECURE-DISABLE` disables the hostname strict resolution.
-                type: string
-              instances:
-                description: Number of Keycloak instances in HA mode. Default is 1.
-                type: integer
+              transaction:
+                description: In this section you can find all properties related to
+                  the settings of transaction behavior.
+                properties:
+                  xaEnabled:
+                    description: Determine whether Keycloak should use a non-XA datasource
+                      in case the database does not support XA transactions.
+                    type: boolean
+                type: object
+              http:
+                description: In this section you can configure Keycloak features related
+                  to HTTP and HTTPS
+                properties:
+                  httpPort:
+                    description: The used HTTP port.
+                    type: integer
+                  tlsSecret:
+                    description: "A secret containing the TLS configuration for HTTPS.\
+                      \ Reference: https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets."
+                    type: string
+                  httpsPort:
+                    description: The used HTTPS port.
+                    type: integer
+                  httpEnabled:
+                    description: Enables the HTTP listener.
+                    type: boolean
+                type: object
               unsupported:
                 description: |-
                   In this section you can configure podTemplate advanced features, not production-ready, and not supported settings.
@@ -2754,20 +2781,43 @@ spec:
                         type: object
                     type: object
                 type: object
-              tlsSecret:
+              ingress:
                 description: |-
-                  A secret containing the TLS configuration for HTTPS. Reference: https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets.
-                  The special value `INSECURE-DISABLE` disables https.
-                type: string
-              disableDefaultIngress:
-                description: Disable the default ingress.
-                type: boolean
+                  The deployment is, by default, exposed through a basic ingress.
+                  You can change this behaviour by setting the enabled property to false.
+                properties:
+                  enabled:
+                    type: boolean
+                type: object
               image:
                 description: Custom Keycloak image to be used.
                 type: string
+              imagePullSecrets:
+                description: Secret(s) that might be used when pulling an image from
+                  a private container image registry or repository.
+                items:
+                  properties:
+                    name:
+                      type: string
+                  type: object
+                type: array
+              features:
+                description: "In this section you can configure Keycloak features,\
+                  \ which should be enabled/disabled."
+                properties:
+                  disabled:
+                    description: Disabled Keycloak features
+                    items:
+                      type: string
+                    type: array
+                  enabled:
+                    description: Enabled Keycloak features
+                    items:
+                      type: string
+                    type: array
+                type: object
             required:
             - hostname
-            - tlsSecret
             type: object
           status:
             properties:
